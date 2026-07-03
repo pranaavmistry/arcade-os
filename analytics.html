@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade OS / Analytics</title>
+    <script src="[https://cdn.jsdelivr.net/npm/chart.js](https://cdn.jsdelivr.net/npm/chart.js)"></script>
+    <style>
+        :root {
+            --bg-dark: #09090b; --card-bg: #18181b; --border-color: #27272a;
+            --text-main: #f4f4f5; --text-muted: #a1a1aa;
+            --primary: #6366f1; --success: #10b981;
+            --warning: #f59e0b; --danger: #ef4444;
+            --epic: #a855f7;
+        }
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg-dark); color: var(--text-main); max-width: 900px; margin: 0 auto; padding: 20px; transition: background-color 0.3s, color 0.3s; }
+        .system-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; }
+        .hud { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-around; align-items: center; }
+        .stat-box { text-align: center; }
+        .stat-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
+        .stat-value { font-size: 2rem; font-weight: 700; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 700px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        .chart-card { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; }
+        .chart-card h3 { margin-top: 0; padding-bottom: 10px; width: 100%; text-align: center; border-bottom: 1px solid var(--border-color); }
+        .btn { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="system-header">
+        <h1 style="margin: 0; font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px;">Data Core</h1>
+        <a href="boss.html" class="btn" style="background: transparent; border: 1px solid var(--primary); color: var(--primary);">⬅ Return to Boss Deck</a>
+    </div>
+
+    <div class="hud">
+        <div class="stat-box">
+            <div class="stat-label">Total Completed</div>
+            <div class="stat-value" id="stat-completed" style="color: var(--success);">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Active Inbox</div>
+            <div class="stat-value" id="stat-pending" style="color: var(--warning);">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Company Tokens</div>
+            <div class="stat-value" id="stat-rank" style="color: var(--epic);">0</div>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <div class="chart-card">
+            <h3>🔥 Priority Distribution (Active)</h3>
+            <div style="width: 100%; max-width: 300px; aspect-ratio: 1;">
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h3>📈 7-Day Completion Velocity</h3>
+            <div style="width: 100%; aspect-ratio: 1;">
+                <canvas id="velocityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tasks = JSON.parse(localStorage.getItem('hc_tasks')) || [];
+        const player = JSON.parse(localStorage.getItem('hc_player')) || { hp: 100, rank: 'Iron', history: {}, tokens: 0 };
+        let priorityChartObj = null; let velocityChartObj = null;
+
+        const c = { bg: '#18181b', text: '#a1a1aa', grid: '#27272a', p1: '#ef4444', p2: '#f59e0b', p3: '#10b981', bar: '#6366f1' };
+
+        window.onload = function() { updateSummary(); renderCharts(); };
+
+        function updateSummary() {
+            document.getElementById('stat-completed').innerText = tasks.filter(t => t.completed).length;
+            document.getElementById('stat-pending').innerText = tasks.filter(t => !t.completed).length;
+            document.getElementById('stat-rank').innerText = player.tokens;
+        }
+
+        function renderCharts() {
+            Chart.defaults.color = c.text; Chart.defaults.borderColor = c.grid;
+            let p1 = 0, p2 = 0, p3 = 0;
+            tasks.forEach(t => { if (!t.completed) { if (t.priority === 'p1') p1++; else if (t.priority === 'p3') p3++; else p2++; } });
+
+            if(priorityChartObj) priorityChartObj.destroy();
+            priorityChartObj = new Chart(document.getElementById('priorityChart').getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: ['Critical (P1)', 'Normal (P2)', 'Low (P3)'], datasets: [{ data: [p1, p2, p3], backgroundColor: [c.p1, c.p2, c.p3], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            const labels = []; const velocityData = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                labels.push(d.toLocaleDateString(undefined, { weekday: 'short' }));
+                velocityData.push(player.history[d.toDateString()] || 0);
+            }
+            if(velocityChartObj) velocityChartObj.destroy();
+            velocityChartObj = new Chart(document.getElementById('velocityChart').getContext('2d'), {
+                type: 'bar',
+                data: { labels: labels, datasets: [{ data: velocityData, backgroundColor: c.bar, borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+            });
+        }
+    </script>
+</body>
+</html>
