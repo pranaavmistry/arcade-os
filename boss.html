@@ -340,5 +340,87 @@
             });
         });
     </script>
+    <!-- NEW: DEPLOY TO SERVER LOGIC -->
+    <script type="module">
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        
+        const db = getFirestore();
+
+        window.deployToServer = async function(event) {
+            const btn = event.target;
+            const originalText = btn.innerText;
+            btn.innerText = "Deploying...";
+            btn.disabled = true;
+
+            // Grab the text from your UI inputs
+            const title = document.querySelector('input[placeholder="Project Title: What needs to be done?"]').value.trim();
+            const instructions = document.querySelector('textarea[placeholder*="Boss Instructions"]').value.trim();
+            const assignee = document.querySelector('input[placeholder*="Assignee ID"]').value.toLowerCase().trim();
+            
+            // Map the priority dropdown (Assuming High = p1, Normal = p2)
+            const selects = document.querySelectorAll('select');
+            let priority = "p2";
+            if(selects.length > 1 && selects[1].value.toLowerCase().includes("high")) priority = "p1";
+
+            if (!title || !assignee) {
+                alert("Missing Intel: Please provide a Project Title and an Assignee ID.");
+                btn.innerText = originalText; btn.disabled = false; return;
+            }
+
+            // Package the data exactly how index.html expects it
+            const newTask = {
+                id: Math.random().toString(36).substr(2, 9),
+                title: title + (instructions ? ` (Boss Note: ${instructions})` : ""),
+                assignee: assignee,
+                priority: priority,
+                timestamp: Date.now(),
+                completed: false,
+                subQuests: []
+            };
+
+            try {
+                // 1. Fetch the exact employee's cloud file
+                const employeeRef = doc(db, "workspaces", assignee);
+                const employeeDoc = await getDoc(employeeRef);
+
+                if (employeeDoc.exists()) {
+                    // 2. Add the new Boss task to their queue
+                    const currentData = employeeDoc.data();
+                    const currentTasks = currentData.tasksData || [];
+                    currentTasks.push(newTask);
+
+                    // 3. Blast it back to the cloud
+                    await updateDoc(employeeRef, {
+                        tasksData: currentTasks,
+                        lastUpdated: new Date()
+                    });
+                    
+                    // Reset the UI fields
+                    document.querySelector('input[placeholder="Project Title: What needs to be done?"]').value = "";
+                    document.querySelector('textarea[placeholder*="Boss Instructions"]').value = "";
+                    btn.innerText = "✅ Deployed!";
+                    setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+                } else {
+                    alert(`Target Not Found: Employee '${assignee}' hasn't logged into Arcade OS yet.`);
+                    btn.innerText = originalText; btn.disabled = false;
+                }
+            } catch (error) {
+                console.error("Deploy Error:", error);
+                alert("Failed to deploy task. Check console.");
+                btn.innerText = "❌ Error";
+                setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 2000);
+            }
+        };
+
+        // Magically bind the function to your existing UI button
+        setTimeout(() => {
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                if (btn.innerText.includes("Deploy to Server")) {
+                    btn.onclick = window.deployToServer;
+                }
+            });
+        }, 1000);
+    </script>
 </body>
 </html>
