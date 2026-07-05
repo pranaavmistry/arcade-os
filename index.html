@@ -735,11 +735,12 @@ Reply briefly to the User's last message. If they ask to mark a task as complete
         }
     </script>
 
-  <!-- FIREBASE CLOUD INITIALIZATION -->
+  <!-- FIREBASE CLOUD INITIALIZATION & RECEIVER -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+        // NEW: We imported getDoc so the employee can download data
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDYirxFL92e9M6DDS0r2DkzKLrEsw_d06Q",
@@ -757,66 +758,46 @@ Reply briefly to the User's last message. If they ask to mark a task as complete
         const provider = new GoogleAuthProvider();
 
         document.getElementById('btn-google-login').addEventListener('click', () => {
-            signInWithPopup(auth, provider).catch((error) => {
-                console.error("Google Sign-in Error:", error);
-                alert("Sign in error. Check the developer console for details.");
-            });
+            signInWithPopup(auth, provider).catch((error) => console.error("Login Error:", error));
         });
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const firstName = user.displayName.split(' ')[0].toLowerCase();
-                window.processLogin(firstName);
-
-                const originalSave = window.saveGame;
-                window.saveGame = async function() {
-                    originalSave(); 
+                
+                // 1. CLOUD DOWNLOADER: Check if the Boss assigned anything while we were away!
+                try {
+                    const employeeRef = doc(db, "workspaces", firstName);
+                    const docSnap = await getDoc(employeeRef);
                     
-                    try {
-                        await setDoc(doc(db, "workspaces", firstName), {
-                            playerData: JSON.parse(localStorage.getItem('hc_player')),
-                            tasksData: JSON.parse(localStorage.getItem('hc_tasks')),
-                            lastUpdated: new Date()
-                        });
-                        console.log("☁️ Data successfully synced to Firebase!");
-                    } catch (error) {
-                        console.error("Cloud Sync Error:", error);
+                    if (docSnap.exists()) {
+                        const cloudData = docSnap.data();
+                        // Save the cloud data to local memory
+                        localStorage.setItem('hc_tasks', JSON.stringify(cloudData.tasksData || []));
+                        localStorage.setItem('hc_player', JSON.stringify(cloudData.playerData || {}));
+                        
+                        // If this is a fresh login, refresh the page once to visually render the new cloud data
+                        if (!sessionStorage.getItem('cloud_synced')) {
+                            sessionStorage.setItem('cloud_synced', 'true');
+                            window.location.reload();
+                            return;
+                        }
                     }
-                };
-            }
-        });
-    </script>
-</body>
-</html>
+                } catch(e) { console.error("Failed to pull from cloud:", e); }
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-
-        document.getElementById('btn-google-login').addEventListener('click', () => {
-            signInWithPopup(auth, provider).catch((error) => {
-                console.error("Google Sign-in Error:", error);
-                alert("Sign in error. Make sure Google Auth is enabled in the Firebase Console!");
-            });
-        });
-
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const firstName = user.displayName.split(' ')[0].toLowerCase();
+                // 2. Standard Login
                 window.processLogin(firstName);
 
+                // 3. Cloud Saver
                 const originalSave = window.saveGame;
                 window.saveGame = async function() {
                     originalSave(); 
-                    
                     try {
                         await setDoc(doc(db, "workspaces", firstName), {
                             playerData: JSON.parse(localStorage.getItem('hc_player')),
                             tasksData: JSON.parse(localStorage.getItem('hc_tasks')),
                             lastUpdated: new Date()
                         });
-                        console.log("☁️ Data successfully synced to Firebase!");
                     } catch (error) {
                         console.error("Cloud Sync Error:", error);
                     }
