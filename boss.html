@@ -304,5 +304,41 @@
             }
         }
     </script>
+    <!-- NEW: FIREBASE CLOUD RADAR FOR BOSS DECK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        // Your exact working configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYirxFL92e9M6DDS0r2DkzKLrEsw_d06Q",
+            authDomain: "arcade-os-e7152.firebaseapp.com",
+            projectId: "arcade-os-e7152",
+            storageBucket: "arcade-os-e7152.firebasestorage.app",
+            messagingSenderId: "973955654492",
+            appId: "1:973955654492:web:012315b3936bc539995799",
+            measurementId: "G-4RBDPWB38F"
+        };
+
+        // Initialize Firebase Radar
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        console.log("📡 Boss Deck Radar Online. Scanning for employee data...");
+
+        // Listen to all workspaces in the cloud in real-time!
+        onSnapshot(collection(db, "workspaces"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added" || change.type === "modified") {
+                    const employeeName = change.doc.id;
+                    const data = change.doc.data();
+                    
+                    console.log(`Incoming Data from [${employeeName.toUpperCase()}]:`, data);
+                    
+                    // TODO in next step: Render this data visually into the Global Task Monitor UI!
+                }
+            });
+        });
+    </script>
 </body>
 </html>
