@@ -422,5 +422,97 @@
             });
         }, 1000);
     </script>
+    <!-- UPGRADED: VISUAL FIREBASE CLOUD RADAR -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYirxFL92e9M6DDS0r2DkzKLrEsw_d06Q",
+            authDomain: "arcade-os-e7152.firebaseapp.com",
+            projectId: "arcade-os-e7152",
+            storageBucket: "arcade-os-e7152.firebasestorage.app",
+            messagingSenderId: "973955654492",
+            appId: "1:973955654492:web:012315b3936bc539995799",
+            measurementId: "G-4RBDPWB38F"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Keep a local ledger of all employee data
+        const allEmployeeData = {};
+
+        onSnapshot(collection(db, "workspaces"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const employeeName = change.doc.id;
+                if (change.type === "removed") {
+                    delete allEmployeeData[employeeName];
+                } else {
+                    allEmployeeData[employeeName] = change.doc.data();
+                }
+            });
+            renderGlobalMonitor();
+        });
+
+        function renderGlobalMonitor() {
+            // 1. Smartly find the visual container in your UI
+            let monitorContainer = document.getElementById('global-task-list');
+            
+            if (!monitorContainer) {
+                const allElements = document.querySelectorAll('*');
+                // Hunt for the ghost "Build the UI" task or the "No active tasks" text
+                for (let el of allElements) {
+                    if (el.textContent === "No active tasks in database." || el.textContent.includes("Build the UI")) {
+                         monitorContainer = el.parentElement;
+                         monitorContainer.id = 'global-task-list';
+                         break;
+                    }
+                }
+            }
+
+            if (!monitorContainer) return;
+
+            // 2. Build the visual cards
+            let html = "";
+            let taskCount = 0;
+
+            for (const [employeeName, data] of Object.entries(allEmployeeData)) {
+                const tasks = data.tasksData || [];
+                
+                tasks.forEach(task => {
+                    if (!task.completed) {
+                        taskCount++;
+                        // Style based on priority
+                        const isCritical = task.priority === 'p1';
+                        const accentColor = isCritical ? '#ef4444' : '#8b5cf6'; // Red for critical, Purple for normal
+                        const priorityText = isCritical ? 'CRITICAL' : 'NORMAL';
+                        
+                        html += `
+                        <div style="background: rgba(25, 25, 35, 0.8); padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.05); border-left: 4px solid ${accentColor}; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="color: white; font-weight: 600; font-size: 1.05em; margin-bottom: 8px;">${task.title}</div>
+                                <div style="display: flex; gap: 8px; font-size: 0.75em; font-weight: bold;">
+                                    <span style="background: rgba(139, 92, 246, 0.2); color: #c4b5fd; padding: 4px 8px; border-radius: 4px;">👤 ${employeeName.toUpperCase()}</span>
+                                    <span style="background: ${isCritical ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.1)'}; color: ${isCritical ? '#fca5a5' : '#a8b2d1'}; padding: 4px 8px; border-radius: 4px;">⚡ ${priorityText}</span>
+                                </div>
+                            </div>
+                            <div style="color: #f59e0b; font-size: 0.85em; font-weight: bold; padding-left: 15px;">
+                                Pending
+                            </div>
+                        </div>`;
+                    }
+                });
+            }
+
+            // 3. Handle empty state
+            if (taskCount === 0) {
+                html = "<p style='color: #a8b2d1; font-size: 0.9em;'>No active tasks in database.</p>";
+            }
+
+            // 4. Inject live data directly into the UI!
+            monitorContainer.innerHTML = html;
+        }
+    </script>
 </body>
 </html>
