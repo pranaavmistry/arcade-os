@@ -735,14 +735,14 @@ Reply briefly to the User's last message. If they ask to mark a task as complete
         }
     </script>
 
-    <!-- FIREBASE CLOUD INITIALIZATION -->
+  <!-- FIREBASE CLOUD INITIALIZATION -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyDYirxFL92e9M6DDS0r2DkzKLrEsw_dO6Q",
+            apiKey: "AIzaSyDYirxFL92e9M6DDS0r2DkzKLrEsw_d06Q",
             authDomain: "arcade-os-e7152.firebaseapp.com",
             projectId: "arcade-os-e7152",
             storageBucket: "arcade-os-e7152.firebasestorage.app",
@@ -750,6 +750,44 @@ Reply briefly to the User's last message. If they ask to mark a task as complete
             appId: "1:973955654492:web:012315b3936bc539995799",
             measurementId: "G-4RBDPWB38F"
         };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        document.getElementById('btn-google-login').addEventListener('click', () => {
+            signInWithPopup(auth, provider).catch((error) => {
+                console.error("Google Sign-in Error:", error);
+                alert("Sign in error. Check the developer console for details.");
+            });
+        });
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const firstName = user.displayName.split(' ')[0].toLowerCase();
+                window.processLogin(firstName);
+
+                const originalSave = window.saveGame;
+                window.saveGame = async function() {
+                    originalSave(); 
+                    
+                    try {
+                        await setDoc(doc(db, "workspaces", firstName), {
+                            playerData: JSON.parse(localStorage.getItem('hc_player')),
+                            tasksData: JSON.parse(localStorage.getItem('hc_tasks')),
+                            lastUpdated: new Date()
+                        });
+                        console.log("☁️ Data successfully synced to Firebase!");
+                    } catch (error) {
+                        console.error("Cloud Sync Error:", error);
+                    }
+                };
+            }
+        });
+    </script>
+</body>
+</html>
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
