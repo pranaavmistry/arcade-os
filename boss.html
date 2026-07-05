@@ -97,7 +97,9 @@
 
     <div class="card">
         <h3 class="card-title">📡 Global Task Monitor</h3>
-        <div id="global-tasks">No active tasks in database.</div>
+        <div id="global-task-list">
+            <p style="color: gray; font-size: 0.9em;">Scanning cloud database...</p>
+        </div>
     </div>
 
     <!-- AGENTIC AI CO-WORKER CHAT PANEL -->
@@ -126,7 +128,7 @@
         let agenda = JSON.parse(localStorage.getItem('hc_agenda')) || [];
         let isCorporate = localStorage.getItem('hc_theme') === 'corporate';
         
-        window.onload = function() { applyTheme(); renderGlobalTasks(); };
+        window.onload = function() { applyTheme(); };
 
         function toggleTheme() { isCorporate = !isCorporate; localStorage.setItem('hc_theme', isCorporate ? 'corporate' : 'arcade'); applyTheme(); }
         function applyTheme() {
@@ -169,7 +171,7 @@
             tasks.push(newTask); localStorage.setItem('hc_tasks', JSON.stringify(tasks));
             
             document.getElementById('task-title').value = ''; document.getElementById('task-assignee').value = ''; document.getElementById('task-summary').value = '';
-            renderGlobalTasks(); slimeSpeak("Task deployed to server.");
+            slimeSpeak("Task deployed to server.");
         }
 
         function addEvent(autoTitle, autoDatetime) {
@@ -183,24 +185,6 @@
             
             document.getElementById('event-title').value = ''; document.getElementById('event-datetime').value = '';
             slimeSpeak("Event added to Global Calendar.");
-        }
-
-        function renderGlobalTasks() {
-            const container = document.getElementById('global-tasks'); container.innerHTML = '';
-            if(tasks.length === 0) { container.innerHTML = 'No active tasks in database.'; return; }
-            
-            tasks.forEach(t => {
-                const status = t.completed ? '<span style="color:var(--success);">Complete</span>' : '<span style="color:var(--warning);">Pending</span>';
-                container.insertAdjacentHTML('afterbegin', `
-                    <div class="task-card">
-                        <div class="task-info">
-                            <strong>${t.title}</strong>
-                            <span class="badge badge-owner">👤 ${t.assignee}</span>
-                        </div>
-                        <div>${status}</div>
-                    </div>
-                `);
-            });
         }
 
         /* --- AI CHAT LOGIC --- */
@@ -304,42 +288,7 @@
             }
         }
     </script>
-    <!-- NEW: FIREBASE CLOUD RADAR FOR BOSS DECK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
-        // Your exact working configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDYirxFL92e9M6DDS0r2DkzKLrEsw_d06Q",
-            authDomain: "arcade-os-e7152.firebaseapp.com",
-            projectId: "arcade-os-e7152",
-            storageBucket: "arcade-os-e7152.firebasestorage.app",
-            messagingSenderId: "973955654492",
-            appId: "1:973955654492:web:012315b3936bc539995799",
-            measurementId: "G-4RBDPWB38F"
-        };
-
-        // Initialize Firebase Radar
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        console.log("📡 Boss Deck Radar Online. Scanning for employee data...");
-
-        // Listen to all workspaces in the cloud in real-time!
-        onSnapshot(collection(db, "workspaces"), (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                if (change.type === "added" || change.type === "modified") {
-                    const employeeName = change.doc.id;
-                    const data = change.doc.data();
-                    
-                    console.log(`Incoming Data from [${employeeName.toUpperCase()}]:`, data);
-                    
-                    // TODO in next step: Render this data visually into the Global Task Monitor UI!
-                }
-            });
-        });
-    </script>
+    
     <!-- NEW: DEPLOY TO SERVER LOGIC -->
     <script type="module">
         import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
@@ -422,6 +371,7 @@
             });
         }, 1000);
     </script>
+    
     <!-- UPGRADED: VISUAL FIREBASE CLOUD RADAR -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
@@ -456,24 +406,9 @@
         });
 
         function renderGlobalMonitor() {
-            // 1. Smartly find the visual container in your UI
             let monitorContainer = document.getElementById('global-task-list');
-            
-            if (!monitorContainer) {
-                const allElements = document.querySelectorAll('*');
-                // Hunt for the ghost "Build the UI" task or the "No active tasks" text
-                for (let el of allElements) {
-                    if (el.textContent === "No active tasks in database." || el.textContent.includes("Build the UI")) {
-                         monitorContainer = el.parentElement;
-                         monitorContainer.id = 'global-task-list';
-                         break;
-                    }
-                }
-            }
-
             if (!monitorContainer) return;
 
-            // 2. Build the visual cards
             let html = "";
             let taskCount = 0;
 
@@ -483,9 +418,8 @@
                 tasks.forEach(task => {
                     if (!task.completed) {
                         taskCount++;
-                        // Style based on priority
                         const isCritical = task.priority === 'p1';
-                        const accentColor = isCritical ? '#ef4444' : '#8b5cf6'; // Red for critical, Purple for normal
+                        const accentColor = isCritical ? '#ef4444' : '#8b5cf6';
                         const priorityText = isCritical ? 'CRITICAL' : 'NORMAL';
                         
                         html += `
@@ -505,12 +439,10 @@
                 });
             }
 
-            // 3. Handle empty state
             if (taskCount === 0) {
                 html = "<p style='color: #a8b2d1; font-size: 0.9em;'>No active tasks in database.</p>";
             }
 
-            // 4. Inject live data directly into the UI!
             monitorContainer.innerHTML = html;
         }
     </script>
