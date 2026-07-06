@@ -23,20 +23,16 @@
 
         body.corporate { --bg-dark: #f1f5f9; --card-bg: #ffffff; --border-color: #cbd5e1; --text-main: #0f172a; --text-muted: #64748b; --primary: #2563eb; --success: #059669; --warning: #d97706; --danger: #e11d48; --epic: #7e22ce; background-image: none; }
         
+        /* Clean, Modern Background (No Grid) */
         body { 
             font-family: 'Inter', -apple-system, sans-serif; 
-            background-color: var(--bg-dark); 
+            background-color: #0f172a; 
             color: var(--text-main); 
             max-width: 900px; 
             margin: 0 auto; 
             padding: 20px; 
             padding-bottom: 150px; 
-            transition: background-color 0.3s, color 0.3s;
-            /* 2026 Trend: Subtle Engineering Grid */
-            background-image: 
-                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-            background-size: 30px 30px; 
+            background-image: none; 
         }
 
         /* Hacker Terminal Headers */
@@ -74,12 +70,40 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: var(--card-bg); padding: 25px; border-radius: 12px; width: 90%; max-width: 420px; border: 1px solid var(--border-color); max-height: 85vh; overflow-y: auto; box-shadow: 0 0 30px rgba(0,0,0,0.8); }
 
-        #companion-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; align-items: flex-end; z-index: 1000; }
-        .speech-bubble { background: var(--text-main); color: var(--bg-dark); font-weight: bold; font-size: 0.85rem; padding: 10px 15px; border-radius: 12px; border-bottom-right-radius: 2px; margin-bottom: 10px; max-width: 200px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.15); opacity: 0; transform: translateY(10px); transition: all 0.3s ease; }
+        /* The Roaming Slime Container */
+        #companion-container { 
+            position: fixed; 
+            top: 80%; 
+            left: 80%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            z-index: 9999; 
+            transition: top 3s ease-in-out, left 3s ease-in-out; 
+            pointer-events: none; 
+        }
+        
+        .mascot-sprite { pointer-events: auto; transition: transform 0.3s; cursor: pointer; }
+        
+        .speech-bubble { 
+            background: white; 
+            color: black; 
+            font-family: 'Inter', sans-serif;
+            font-weight: bold; 
+            font-size: 0.85rem; 
+            padding: 10px 15px; 
+            border-radius: 20px; 
+            border-bottom-right-radius: 2px; 
+            margin-bottom: 10px; 
+            max-width: 200px; 
+            text-align: center; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); 
+            opacity: 0; 
+            transform: translateY(10px); 
+            transition: all 0.3s ease; 
+        }
+        
         .speech-bubble.active { opacity: 1; transform: translateY(0); }
-        .mascot-sprite { font-size: 3rem; line-height: 1; transition: all 0.3s; cursor: pointer; }
-        body:not(.corporate) .mascot-sprite { animation: floatMascot 3s ease-in-out infinite; filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.6)); }
-        @keyframes floatMascot { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-10px) scale(1.05); } }
         
         #ai-chat-panel { display: none; position: fixed; bottom: 90px; right: 20px; width: 320px; background: var(--card-bg); border: 1px solid var(--primary); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 1000; overflow: hidden; transition: all 0.3s; backdrop-filter: blur(15px); }
     </style>
@@ -518,5 +542,62 @@
             monitorContainer.innerHTML = html;
         }
     </script>
+    /* --- VIRTUAL PET SLIME BRAIN --- */
+        const slimeContainer = document.getElementById('companion-container');
+        const mascotEl = document.getElementById('mascot');
+        
+        function roamSlime() {
+            // Calculate screen boundaries so it doesn't walk off-screen
+            const maxX = window.innerWidth - 120;
+            const maxY = window.innerHeight - 150;
+            
+            // Pick a random destination
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY) + 20;
+
+            // Flip the slime to face the direction it is walking
+            const currentX = parseInt(slimeContainer.style.left || window.innerWidth - 100);
+            if (randomX < currentX) {
+                mascotEl.style.transform = "scaleX(1)"; // Face Left
+            } else {
+                mascotEl.style.transform = "scaleX(-1)"; // Face Right
+            }
+
+            // Move the slime
+            slimeContainer.style.left = randomX + 'px';
+            slimeContainer.style.top = randomY + 'px';
+            
+            // 40% chance to remind you of a task when it finishes walking
+            if (Math.random() > 0.6) {
+                setTimeout(giveTaskReminder, 3100); 
+            }
+
+            // Decide when to move next (between 4 and 10 seconds)
+            const nextMove = Math.floor(Math.random() * 6000) + 4000;
+            setTimeout(roamSlime, nextMove);
+        }
+
+        function giveTaskReminder() {
+            // Find tasks that are not done yet
+            const pendingTasks = tasks.filter(t => t.status !== 'completed');
+            
+            if (pendingTasks.length > 0) {
+                const randomTask = pendingTasks[Math.floor(Math.random() * pendingTasks.length)];
+                const speechBubble = document.getElementById('slime-speech');
+                
+                if(randomTask.priority === 'p1' || randomTask.priority === 'Critical') {
+                    speechBubble.innerText = "🚨 BOSS! Don't forget: " + randomTask.title;
+                } else {
+                    speechBubble.innerText = "Just reminding you about: " + randomTask.title;
+                }
+                
+                // Show the bubble for 4 seconds
+                speechBubble.classList.add('active');
+                setTimeout(() => speechBubble.classList.remove('active'), 4000);
+            }
+        }
+
+        // Wake up the slime 2 seconds after the page loads
+        setTimeout(roamSlime, 2000);
 </body>
 </html>
