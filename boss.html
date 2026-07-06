@@ -359,27 +359,30 @@
             }
         }
 
-        /* --- VIRTUAL PET SLIME BRAIN (JAILBREAK FIX) --- */
+      /* --- VIRTUAL PET SLIME BRAIN (CLICK-TO-MOVE) --- */
         const slimeContainer = document.getElementById('companion-container');
         const mascotEl = document.getElementById('mascot');
         
+        // Release from the corner
         slimeContainer.style.bottom = 'auto';
         slimeContainer.style.right = 'auto';
         
+        // Make the slime move AND open chat when clicked!
+        mascotEl.onclick = function() {
+            toggleAIChat();
+            roamSlime();
+        };
+        
         function roamSlime() {
-            // Don't walk away if the chat is open!
-            const panel = document.getElementById('ai-chat-panel');
-            if(panel && panel.style.display === 'block') {
-                setTimeout(roamSlime, 3000);
-                return;
-            }
-
+            // Calculate screen bounds
             const maxX = window.innerWidth - 120;
             const maxY = window.innerHeight - 150;
             
+            // Pick a random spot
             const randomX = Math.floor(Math.random() * maxX);
             const randomY = Math.floor(Math.random() * maxY) + 20;
 
+            // Flip slime to face the direction it's going
             const currentX = parseInt(slimeContainer.style.left || window.innerWidth - 100);
             if (randomX < currentX) {
                 mascotEl.style.transform = "scaleX(1)"; 
@@ -387,15 +390,14 @@
                 mascotEl.style.transform = "scaleX(-1)"; 
             }
 
+            // Move it!
             slimeContainer.style.left = randomX + 'px';
             slimeContainer.style.top = randomY + 'px';
             
-            if (Math.random() > 0.6) {
+            // 50% chance to shout a task reminder when poked
+            if (Math.random() > 0.5) {
                 setTimeout(giveTaskReminder, 3100); 
             }
-
-            const nextMove = Math.floor(Math.random() * 6000) + 4000;
-            setTimeout(roamSlime, nextMove);
         }
 
         function giveTaskReminder() {
