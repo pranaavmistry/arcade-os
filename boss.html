@@ -204,13 +204,13 @@
 
         function toggleTheme() { isCorporate = !isCorporate; localStorage.setItem('hc_theme', isCorporate ? 'corporate' : 'arcade'); applyTheme(); }
         function applyTheme() {
+         function applyTheme() {
             if (isCorporate) {
                 document.body.classList.add('corporate'); document.getElementById('btn-theme').innerText = "👾 Arcade Mode";
-                document.getElementById('mascot').innerText = "🤖";
             } else {
                 document.body.classList.remove('corporate'); document.getElementById('btn-theme').innerText = "👔 Corporate Mode";
-                document.getElementById('mascot').innerText = "💧";
             }
+        }
         }
         
         function clearData() { if(confirm("Wipe all system data?")) { localStorage.clear(); location.reload(); } }
