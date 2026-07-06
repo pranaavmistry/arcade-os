@@ -19,15 +19,17 @@
             --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
         }
 
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background-color: var(--bg-dark); 
-            color: var(--text-main); 
-            max-width: 900px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            padding-bottom: 150px; 
-            background-image: none; 
+        /* --- CORPORATE LIGHT MODE OVERRIDE --- */
+        body.corporate {
+            --bg-dark: #f1f5f9; 
+            --card-bg: #ffffff; 
+            --border-color: #cbd5e1; 
+            --text-main: #0f172a; 
+            --text-muted: #64748b; 
+            --primary: #2563eb; 
+            --success: #059669; 
+            --danger: #e11d48; 
+            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
         h1, h2, h3, .card-title { font-family: 'Inter', sans-serif; font-weight: 800; letter-spacing: -0.5px; margin-top: 0; }
