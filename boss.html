@@ -73,6 +73,13 @@
         .speech-bubble.active { opacity: 1; transform: translateY(0); }
         
         #ai-chat-panel { display: none; position: fixed; bottom: 90px; right: 20px; width: 320px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: var(--shadow); z-index: 1000; overflow: hidden; }
+   /* --- PREMIUM SMOOTH ANIMATIONS --- */
+        body, .card, .task-card, #ai-chat-panel, .modal-content, input, select, textarea, .system-header {
+            transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), 
+                        box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body>
