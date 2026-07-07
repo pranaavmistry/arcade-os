@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arcade OS | OMNI-COMMAND</title>
     <style>
-        /* --- APEX-QUARTZ DESIGN SYSTEM: THE MASTER BUILD --- */
+        /* --- APEX-QUARTZ DESIGN SYSTEM --- */
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
 
         :root {
@@ -19,6 +19,17 @@
             --glass-alabaster: rgba(250, 250, 252, 0.75);
         }
 
+        /* --- ARCADE MODE (OBSIDIAN-VOID) --- */
+        [data-theme="arcade"] {
+            --bg-alabaster: #050507; 
+            --text-obsidian: #FAFAFC; 
+            --muted-slate: #64748b;
+            --liquid-gold: #38bdf8; 
+            --deboss-shadow: inset 3px 3px 8px rgba(0, 0, 0, 0.8), inset -3px -3px 8px rgba(255, 255, 255, 0.05);
+            --float-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+            --glass-alabaster: rgba(10, 10, 15, 0.75);
+        }
+
         body { 
             font-family: 'Space Grotesk', sans-serif; 
             background-color: var(--bg-alabaster); 
@@ -26,19 +37,20 @@
             margin: 0; padding: 40px; 
             display: flex; flex-direction: column; align-items: center;
             overflow-x: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
 
-        /* --- 1. THE ARCHITECTURAL HEADER --- */
+        /* --- 1. HEADER --- */
         .system-header {
             display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; 
             background: var(--glass-alabaster); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             padding: 20px 40px; border-radius: 20px; box-shadow: var(--float-shadow);
             margin-bottom: 40px; width: 100%; max-width: 800px; box-sizing: border-box;
             border: 1px solid rgba(0,0,0,0.02);
+            transition: all 0.4s ease;
         }
         
         .system-header h1 { margin: 0; font-size: 1.5rem; letter-spacing: -0.5px; }
-
         .header-buttons { display: flex; gap: 15px; }
         
         button, .btn-outline {
@@ -51,37 +63,42 @@
         
         button:hover, .btn-outline:hover { background: #F0F0F3; box-shadow: var(--deboss-shadow); transform: translateY(1px); }
 
-        /* --- 2. THE OMNI-BAR --- */
+        [data-theme="arcade"] button, [data-theme="arcade"] .btn-outline { background: #0f172a; border-color: rgba(255,255,255,0.1); }
+        [data-theme="arcade"] button:hover, [data-theme="arcade"] .btn-outline:hover { background: #1e293b; }
+        [data-theme="arcade"] .omni-bar-container, [data-theme="arcade"] .modal-content input[type="password"] { background: #0f172a; border-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.05);}
+        [data-theme="arcade"] .task-slab { background: #0a0a0f; border-color: rgba(255,255,255,0.05); }
+
+        /* --- 2. OMNI-BAR --- */
         .omni-bar-container {
             width: 100%; max-width: 800px; background: #F0F0F3; box-sizing: border-box;
             border-radius: 16px; padding: 20px 30px; box-shadow: var(--deboss-shadow);
             margin-bottom: 50px; display: flex; align-items: center; gap: 20px;
+            transition: all 0.4s ease;
         }
         
         .omni-input {
             flex-grow: 1; background: transparent; border: none;
-            font-family: inherit; font-size: 1.5rem; font-weight: 300;
+            font-family: inherit; font-size: 1.2rem; font-weight: 300;
             color: var(--text-obsidian); outline: none; width: 100%;
         }
         .omni-input::placeholder { color: var(--muted-slate); font-weight: 300; }
 
         .btn-gold {
-            background: var(--liquid-gold); color: white; border: none; 
+            background: var(--liquid-gold) !important; color: white !important; border: none !important; 
             padding: 12px 30px; border-radius: 8px;
             font-family: inherit; font-weight: 700; font-size: 1rem;
             text-transform: uppercase; letter-spacing: 2px;
-            cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-            box-shadow: 0 10px 20px rgba(212, 175, 55, 0.3);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
         }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(212, 175, 55, 0.4); }
-        .btn-gold:active { transform: translateY(1px) scale(0.98); box-shadow: 0 5px 10px rgba(212, 175, 55, 0.2); }
+        .btn-gold:hover { transform: translateY(-2px); filter: brightness(1.1); }
 
-        /* --- 3. DATA SLABS (INK BLEED) --- */
+        /* --- 3. DATA SLABS --- */
         .task-slab {
             width: 100%; max-width: 800px; box-sizing: border-box; background: var(--bg-alabaster);
             border: 1px solid rgba(0,0,0,0.03); border-radius: 12px; padding: 25px; margin-bottom: 15px;
             box-shadow: var(--float-shadow); display: flex; justify-content: space-between; align-items: center;
             opacity: 0; animation: inkBleed 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            transition: all 0.4s ease;
         }
         .task-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 5px; }
         .task-meta { font-size: 0.85rem; color: var(--muted-slate); text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
@@ -91,7 +108,7 @@
             100% { opacity: 1; filter: blur(0); transform: scale(1) translateY(0); }
         }
 
-        /* --- 4. SETTINGS MODAL (OBSIDIAN OVERLAY) --- */
+        /* --- 4. SETTINGS MODAL --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(26, 26, 30, 0.6); backdrop-filter: blur(15px);
@@ -100,6 +117,7 @@
         .modal-content {
             background: var(--bg-alabaster); padding: 40px; border-radius: 20px;
             width: 90%; max-width: 450px; box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+            transition: all 0.4s ease;
         }
         .modal-content input[type="password"] {
             width: 100%; padding: 15px; border-radius: 8px; border: none; box-sizing: border-box;
@@ -108,14 +126,13 @@
             margin: 10px 0 20px 0; outline: none; font-size: 1rem; letter-spacing: 2px;
         }
 
-        /* --- 5. AI CHAT PANEL (OBSIDIAN TERMINAL) --- */
+        /* --- 5. AI TERMINAL --- */
         #ai-chat-panel {
             position: fixed; bottom: 30px; right: 30px; width: 380px; 
             background: var(--glass-obsidian); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.1); border-radius: 16px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.4); overflow: hidden;
             display: none; flex-direction: column; z-index: 1000;
-            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
         
         #ai-chat-panel .chat-header {
@@ -137,13 +154,12 @@
             flex-grow: 1; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px; color: white; outline: none; font-family: 'Space Grotesk', sans-serif;
         }
-        #ai-chat-panel button { background: var(--liquid-gold); color: white; border: none; padding: 0 20px; box-shadow: none; }
+        #ai-chat-panel button { background: var(--liquid-gold) !important; color: white !important; border: none; padding: 0 20px; }
 
-        /* --- 6. THE GYROSCOPE MASCOT (Replaces Slime) --- */
+        /* --- 6. GYROSCOPE --- */
         #gyro-mascot {
             position: fixed; bottom: 50px; right: 50px; width: 80px; height: 80px; 
-            cursor: pointer; perspective: 1000px; z-index: 500;
-            transition: transform 0.3s;
+            cursor: pointer; perspective: 1000px; z-index: 500; transition: transform 0.3s;
         }
         #gyro-mascot:hover { transform: scale(1.1); }
         .gyro-ring { position: absolute; width: 100%; height: 100%; border: 1px solid rgba(212, 175, 55, 0.4); border-radius: 50%; transform-style: preserve-3d; pointer-events: none; }
@@ -161,7 +177,6 @@
             opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; z-index: 499;
         }
         .system-notification.active { opacity: 1; transform: translateY(0); }
-
     </style>
 </head>
 <body>
@@ -169,6 +184,7 @@
     <div class="system-header">
         <h1>👑 OMNI-COMMAND</h1>
         <div class="header-buttons">
+            <button id="theme-toggle" onclick="toggleTheme()">👾 Arcade Mode</button>
             <button onclick="clearData()">Clear Cache</button>
             <button onclick="openSettings()">⚙️ Settings</button>
             <a href="index.html" class="btn-outline">Employee Deck ➔</a>
@@ -179,9 +195,7 @@
         <div class="modal-content">
             <h3 style="margin-top:0; color: var(--text-obsidian);">System Configuration</h3>
             <p style="font-size: 0.85rem; color: var(--muted-slate); margin-bottom: 20px;">Secure your Gemini REST API Key to activate the Agentic AI.</p>
-            
             <input type="password" id="api-key-input" placeholder="AIzaSy...">
-            
             <div style="display: flex; gap: 10px;">
                 <button class="btn-gold" style="flex-grow: 1;" onclick="saveSettings()">Initialize</button>
                 <button onclick="closeSettings()">Abort</button>
@@ -194,8 +208,7 @@
         <button class="btn-gold" onclick="executeOmniCommand()">Execute</button>
     </div>
 
-    <div id="global-task-list" style="width: 100%; max-width: 800px;">
-        </div>
+    <div id="global-task-list" style="width: 100%; max-width: 800px;"></div>
 
     <div id="ai-chat-panel">
         <div class="chat-header">
@@ -216,126 +229,51 @@
         <div class="gyro-ring ring-2"></div>
         <div class="gyro-ring ring-3"></div>
     </div>
+    
     <div class="system-notification" id="system-notification">Awaiting Orders.</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-        import { getFirestore, collection, doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDYirxFL92e9M6DDS0r2DkzKLrEsw_d06Q",
-            authDomain: "arcade-os-e7152.firebaseapp.com",
-            projectId: "arcade-os-e7152",
-            storageBucket: "arcade-os-e7152.firebasestorage.app",
-            messagingSenderId: "973955654492",
-            appId: "1:973955654492:web:012315b3936bc539995799",
-            measurementId: "G-4RBDPWB38F"
+    <script>
+        // --- THEME ENGINE ---
+        let isArcade = localStorage.getItem('hc_theme') === 'arcade';
+        
+        window.onload = () => {
+            if(isArcade) {
+                document.documentElement.setAttribute('data-theme', 'arcade');
+                document.getElementById('theme-toggle').innerText = "👔 Corporate Mode";
+            }
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const allEmployeeData = {};
-
-        // --- REALTIME RADAR ---
-        onSnapshot(collection(db, "workspaces"), (snapshot) => {
-            snapshot.docChanges().forEach((change) => {
-                const employeeName = change.doc.id;
-                if (change.type === "removed") {
-                    delete allEmployeeData[employeeName];
-                } else {
-                    allEmployeeData[employeeName] = change.doc.data();
-                }
-            });
-            renderGlobalMonitor();
-        });
-
-        function renderGlobalMonitor() {
-            let monitorContainer = document.getElementById('global-task-list');
-            if (!monitorContainer) return;
-            let html = "";
-            let taskCount = 0;
-
-            for (const [employeeName, data] of Object.entries(allEmployeeData)) {
-                const tasks = data.tasksData || [];
-                tasks.forEach((task, index) => {
-                    if (!task.completed) {
-                        taskCount++;
-                        const isCritical = task.priority === 'p1';
-                        const delay = index * 0.15; 
-                        
-                        html += `
-                        <div class="task-slab" style="animation-delay: ${delay}s;">
-                            <div>
-                                <div class="task-title">${task.title}</div>
-                                <div class="task-meta">
-                                    <span style="color: var(--liquid-gold);">ID:</span> ${employeeName.toUpperCase()} 
-                                    &nbsp;|&nbsp; 
-                                    <span style="color: ${isCritical ? '#ff3b30' : 'var(--muted-slate)'};">${isCritical ? 'CRITICAL STRIKE' : 'STANDARD OP'}</span>
-                                </div>
-                            </div>
-                            <div style="color: var(--liquid-gold); font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">AWAITING</div>
-                        </div>`;
-                    }
-                });
+        function toggleTheme() {
+            isArcade = !isArcade;
+            if(isArcade) {
+                document.documentElement.setAttribute('data-theme', 'arcade');
+                document.getElementById('theme-toggle').innerText = "👔 Corporate Mode";
+                localStorage.setItem('hc_theme', 'arcade');
+            } else {
+                document.documentElement.removeAttribute('data-theme');
+                document.getElementById('theme-toggle').innerText = "👾 Arcade Mode";
+                localStorage.setItem('hc_theme', 'corporate');
             }
-
-            if (taskCount === 0) {
-                html = "<p style='color: var(--muted-slate); font-size: 1.2rem; font-weight: 300; text-align: center; margin-top: 50px;'>The grid is silent. No active operations.</p>";
-            }
-            monitorContainer.innerHTML = html;
         }
 
-        // --- PROGRAMMATIC DEPLOYMENT ENGINE (Used by Omni-Bar and AI) ---
-        window.executeCloudDeploy = async function(title, assignee, priority = "p2", note = "") {
-            try {
-                const employeeRef = doc(db, "workspaces", assignee);
-                const employeeDoc = await getDoc(employeeRef);
-
-                const newTask = {
-                    id: Math.random().toString(36).substr(2, 9),
-                    title: title + (note ? ` (Note: ${note})` : ""),
-                    assignee: assignee,
-                    priority: priority,
-                    timestamp: Date.now(),
-                    completed: false,
-                    subQuests: []
-                };
-
-                if (employeeDoc.exists()) {
-                    const currentTasks = employeeDoc.data().tasksData || [];
-                    currentTasks.push(newTask);
-                    await updateDoc(employeeRef, { tasksData: currentTasks, lastUpdated: new Date() });
-                    systemNotify(`Deployed to ${assignee.toUpperCase()}`);
-                    return true;
-                } else {
-                    systemNotify(`Error: ID '${assignee}' not in database.`, true);
-                    return false;
-                }
-            } catch (error) {
-                console.error("Deploy Error:", error);
-                systemNotify("Deployment Failed.", true);
-                return false;
-            }
-        };
-    </script>
-
-    <script>
-        // --- OMNI-BAR COMMAND PARSER ---
+        // --- COMMAND PARSER ---
         async function executeOmniCommand() {
             const inputEl = document.getElementById('omni-input');
             const cmd = inputEl.value.trim();
             if(!cmd) return;
 
-            // Simple NLP Regex: Looks for "Deploy [anything] to @[name]"
             const match = cmd.match(/(?:deploy|assign|create) (.+) to @([\w-]+)/i);
-            
             if(match) {
                 const title = match[1].trim();
                 const assignee = match[2].toLowerCase().trim();
                 inputEl.value = "Executing command...";
                 inputEl.disabled = true;
                 
-                await window.executeCloudDeploy(title, assignee, "p2", "Deployed via Omni-Bar");
+                if (window.executeCloudDeploy) {
+                    await window.executeCloudDeploy(title, assignee, "p2", "Deployed via Omni-Bar");
+                } else {
+                    systemNotify("Cloud logic not loaded yet.", true);
+                }
                 
                 inputEl.value = "";
                 inputEl.disabled = false;
@@ -344,7 +282,7 @@
             }
         }
 
-        // --- NOTIFICATION ENGINE ---
+        // --- NOTIFICATIONS & UI ---
         let notifyTimeout;
         function systemNotify(text, isError = false) {
             const bubble = document.getElementById('system-notification'); 
@@ -357,20 +295,21 @@
             notifyTimeout = setTimeout(() => { bubble.classList.remove('active'); }, 4000);
         }
 
-        // --- SETTINGS LOGIC ---
         function clearData() { if(confirm("Wipe local cache?")) { localStorage.clear(); location.reload(); } }
+        
         function openSettings() {
             document.getElementById('api-key-input').value = localStorage.getItem('hc_apikey') || "";
             document.getElementById('settings-modal').style.display = 'flex';
         }
+        
         function closeSettings() { document.getElementById('settings-modal').style.display = 'none'; }
+        
         function saveSettings() {
             localStorage.setItem('hc_apikey', document.getElementById('api-key-input').value.trim());
             closeSettings(); 
             systemNotify("API Key Secured.");
         }
 
-        // --- AI CHAT LOGIC ---
         function toggleAIChat() {
             const panel = document.getElementById('ai-chat-panel');
             if (panel.style.display === 'none' || panel.style.display === '') {
@@ -397,7 +336,6 @@
                 return;
             }
             
-            // Minimal prompt to keep responses sharp
             const prompt = `You are a corporate AI assistant built into an Obsidian-glass command terminal. The boss says: "${msg}". Reply briefly. If asked to deploy a task, use the deploy_task tool.`;
             
             try {
@@ -448,6 +386,107 @@
                 history.scrollTop = history.scrollHeight;
             }
         }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+        import { getFirestore, collection, doc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYirxFL92e9M6DDS0r2DkzKLrEsw_d06Q",
+            authDomain: "arcade-os-e7152.firebaseapp.com",
+            projectId: "arcade-os-e7152",
+            storageBucket: "arcade-os-e7152.firebasestorage.app",
+            messagingSenderId: "973955654492",
+            appId: "1:973955654492:web:012315b3936bc539995799",
+            measurementId: "G-4RBDPWB38F"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const allEmployeeData = {};
+
+        onSnapshot(collection(db, "workspaces"), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                const employeeName = change.doc.id;
+                if (change.type === "removed") {
+                    delete allEmployeeData[employeeName];
+                } else {
+                    allEmployeeData[employeeName] = change.doc.data();
+                }
+            });
+            renderGlobalMonitor();
+        });
+
+        function renderGlobalMonitor() {
+            let monitorContainer = document.getElementById('global-task-list');
+            if (!monitorContainer) return;
+            let html = "";
+            let taskCount = 0;
+
+            for (const [employeeName, data] of Object.entries(allEmployeeData)) {
+                const tasks = data.tasksData || [];
+                tasks.forEach((task, index) => {
+                    if (!task.completed) {
+                        taskCount++;
+                        const isCritical = task.priority === 'p1';
+                        const delay = index * 0.15; 
+                        
+                        html += `
+                        <div class="task-slab" style="animation-delay: ${delay}s;">
+                            <div>
+                                <div class="task-title">${task.title}</div>
+                                <div class="task-meta">
+                                    <span style="color: var(--liquid-gold);">ID:</span> ${employeeName.toUpperCase()} 
+                                    &nbsp;|&nbsp; 
+                                    <span style="color: ${isCritical ? '#ff3b30' : 'var(--muted-slate)'};">${isCritical ? 'CRITICAL STRIKE' : 'STANDARD OP'}</span>
+                                </div>
+                            </div>
+                            <div style="color: var(--liquid-gold); font-weight: 700; font-size: 0.85rem; letter-spacing: 1px;">AWAITING</div>
+                        </div>`;
+                    }
+                });
+            }
+
+            if (taskCount === 0) {
+                html = "<p style='color: var(--muted-slate); font-size: 1.2rem; font-weight: 300; text-align: center; margin-top: 50px;'>The grid is silent. No active operations.</p>";
+            }
+            monitorContainer.innerHTML = html;
+        }
+
+        window.executeCloudDeploy = async function(title, assignee, priority = "p2", note = "") {
+            try {
+                const employeeRef = doc(db, "workspaces", assignee);
+                const employeeDoc = await getDoc(employeeRef);
+
+                const newTask = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    title: title + (note ? ` (Note: ${note})` : ""),
+                    assignee: assignee,
+                    priority: priority,
+                    timestamp: Date.now(),
+                    completed: false,
+                    subQuests: []
+                };
+
+                if (employeeDoc.exists()) {
+                    const currentTasks = employeeDoc.data().tasksData || [];
+                    currentTasks.push(newTask);
+                    await updateDoc(employeeRef, { tasksData: currentTasks, lastUpdated: new Date() });
+                    document.getElementById('system-notification').innerText = `Deployed to ${assignee.toUpperCase()}`;
+                    document.getElementById('system-notification').classList.add('active');
+                    setTimeout(() => { document.getElementById('system-notification').classList.remove('active'); }, 4000);
+                    return true;
+                } else {
+                    alert(`Error: ID '${assignee}' not in database.`);
+                    return false;
+                }
+            } catch (error) {
+                console.error("Deploy Error:", error);
+                alert("Deployment Failed.");
+                return false;
+            }
+        };
     </script>
 </body>
 </html>
