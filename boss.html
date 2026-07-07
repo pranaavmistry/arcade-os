@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arcade OS / Boss Deck</title>
+    <style>
    /* --- APEX-QUARTZ DESIGN SYSTEM --- */
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
 
@@ -99,6 +100,7 @@
         @keyframes spin { 0% { transform: rotateX(0deg) rotateY(0deg); } 100% { transform: rotateX(360deg) rotateY(360deg); } }
         @keyframes spin-reverse { 0% { transform: rotateX(360deg) rotateZ(0deg); } 100% { transform: rotateX(0deg) rotateZ(360deg); } }
         @keyframes spin-tilt { 0% { transform: rotateY(0deg) rotateZ(45deg); } 100% { transform: rotateY(360deg) rotateZ(45deg); } }
+        </style>
 </head>
 <body>
 
@@ -128,21 +130,15 @@
         </div>
     </div>
 
-    <div class="dashboard-grid">
-    <!-- Everything inside Deploy New Project -->
-    ...
-    <!-- Everything inside Master Schedule -->
-    ...
-        <button class="btn-success" onclick="addEvent()">Add to Global Calendar</button>
+    <!-- THE OMNI-BAR -->
+    <div class="omni-bar-container">
+        <input type="text" id="omni-input" class="omni-input" placeholder="Command your fleet (e.g., 'Deploy UI update to @mistry by Friday')...">
+        <button class="btn-gold" onclick="executeOmniCommand()">Execute</button>
     </div>
-</div>  <-- CUT EVERYTHING UP TO THIS LAST CLOSING DIV
 
-    <!-- TASK MONITOR -->
-    <div class="card" style="margin-bottom: 40px;">
-        <h3 class="card-title">📡 GLOBAL TASK MONITOR</h3>
-        <div id="global-task-list">
-            <p style="color: gray; font-size: 0.9em;">Scanning cloud database...</p>
-        </div>
+    <!-- THE DATA FEED -->
+    <div id="global-task-list" style="width: 100%; max-width: 800px;">
+        <!-- Tasks will generate here -->
     </div>
 
     <!-- AGENTIC AI CO-WORKER CHAT PANEL -->
